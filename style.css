@@ -106,6 +106,48 @@ body {
     border-bottom: 1px solid #ddd;
 }
 
+/* HOW TO PLAY */
+
+.info-boxes{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+}
+
+.info-box {
+    background: #ffffff;
+    padding: 1rem;
+    border: 1px solid #d4bb86;
+    border-radius: 6px;
+}
+
+.how-to-play{
+    padding: 0 1rem;
+}
+
+.how-to-play h3 {
+    color: #3e5f3e;
+    margin-bottom: 0.5 rem;
+    text-align: center;
+    text-decoration: underline;
+}
+.how-to-play h4{
+    color: #5c3a21;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.how-to-play p {
+    margin-bottom: 1rem;
+}
+
+.how-to-play ul {
+    list-style: disc inside;
+    margin-left: 1rem;
+}
+
 /* FOOTER */
 
 .site-footer {
