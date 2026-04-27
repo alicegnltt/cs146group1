@@ -175,3 +175,73 @@ body {
         flex-direction: column;
     }
 }
+
+.character-start-card,
+.quiz-card {
+    max-width: 750px;
+    margin: 40px auto;
+    padding: 32px;
+}
+
+.character-start-card h2,
+.quiz-card h2 {
+    margin-bottom: 20px;
+}
+
+#player-name {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 12px;
+    margin: 8px 0 12px;
+    font-size: 1rem;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.error-message {
+    color: #8b1e1e;
+    font-weight: bold;
+    margin-top: 6px;
+}
+
+.input-error {
+    border: 2px solid #8b1e1e;
+    background-color: #fff6f6;
+}
+
+#question-text {
+    font-size: 1.4rem;
+    line-height: 1.4;
+    margin-bottom: 24px;
+}
+
+#options-container {
+    display: grid;
+    gap: 14px;
+}
+
+#options-container button {
+    padding: 14px 18px;
+    border: 2px solid #2f4f2f;
+    background-color: #f7f1e3;
+    font-family: inherit;
+    font-size: 1.05rem;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+#options-container button:hover {
+    background-color: #e7dcc8;
+    transform: translateY(-1px);
+}
+
+.secondary-button {
+    opacity: 0.9;
+}
