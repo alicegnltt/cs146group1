@@ -38,11 +38,18 @@ main {
     text-transform: uppercase;
 }
 
-.score .box {
+/* .score .box {
     width: 65px;
     height: 65px;
     background: #ffffff;
     border: 1px solid #d7cdb7;
+} */
+.score .box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
 }
 
 h1 {
@@ -149,6 +156,33 @@ small {
     border: 1px solid #d7cdb7;
     text-transform: uppercase;
 }
+.heart-box p,
+.SAI {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.score .box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.ability-score-number {
+    font-size: 36px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.ability-score-mod {
+    font-size: 18px;
+    line-height: 1;
+    margin-top: 4px;
+}
 
 
 /* Taller personality boxes */
@@ -158,20 +192,22 @@ small {
 }
 
 /* Attacks table */
+
 table {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 0.75rem;
+    border-collapse: separate;
+    border-spacing: 8px 6px; /* horizontal / vertical spacing */
+}
+
+table td {
+    padding: 4px 8px;
+    width: 100%;
 }
 
 th {
     padding: 3px 4px;
     text-align: left;
     font-weight: normal;
-}
-
-td {
-    padding: 8px 4px;
 }
 
 /* Death saves inline dots */
