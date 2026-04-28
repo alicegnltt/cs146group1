@@ -511,68 +511,57 @@ let WEAPON_STATS = {
     stat: "Dexterity",
     damage: "1d4",
     type: "Piercing",
-    notes: "Finesse, Light, Thrown",
   },
   Shortbow: {
     stat: "Dexterity",
     damage: "1d6",
     type: "Piercing",
-    notes: "Ammunition, Range",
   },
   Longbow: {
     stat: "Dexterity",
     damage: "1d8",
     type: "Piercing",
-    notes: "Ammunition, Heavy, Range",
   },
   Longsword: {
     stat: "Strength",
     damage: "1d8",
     type: "Slashing",
-    notes: "Versatile",
   },
   Shortsword: {
     stat: "Dexterity",
     damage: "1d6",
     type: "Piercing",
-    notes: "Finesse, Light",
   },
-  Mace: { stat: "Strength", damage: "1d6", type: "Bludgeoning", notes: "" },
+  Mace: { stat: "Strength", damage: "1d6", type: "Bludgeoning" },
   Quarterstaff: {
     stat: "Strength",
     damage: "1d6",
     type: "Bludgeoning",
-    notes: "Versatile",
   },
   Spear: {
     stat: "Strength",
     damage: "1d6",
     type: "Piercing",
-    notes: "Thrown, Versatile",
   },
   Greataxe: {
     stat: "Strength",
     damage: "1d12",
     type: "Slashing",
-    notes: "Heavy, Two-Handed",
   },
   Handaxe: {
     stat: "Strength",
     damage: "1d6",
     type: "Slashing",
-    notes: "Light, Thrown",
   },
   Rapier: {
     stat: "Dexterity",
     damage: "1d8",
     type: "Piercing",
-    notes: "Finesse",
   },
   Scimitar: {
     stat: "Dexterity",
     damage: "1d6",
     type: "Slashing",
-    notes: "Finesse, Light",
   },
 };
 
@@ -1400,7 +1389,6 @@ window.addEventListener("load", function () {
         attackBonus: (attackBonus >= 0 ? "+" : "") + attackBonus,
         damage: wStats.damage + damageMod,
         type: wStats.type,
-        notes: wStats.notes,
       });
     }
 
