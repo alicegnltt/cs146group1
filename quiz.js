@@ -631,38 +631,42 @@ function rollAllScores() {
 window.addEventListener("load", function () {
   let setupScreen = document.getElementById("setup-screen");
   let quizScreen = document.getElementById("quiz-screen");
-  
+
   // CHANGE THIS LINE to be specific:
-  let startButton = document.getElementById("manual-btn"); 
-  
+  let startButton = document.getElementById("manual-btn");
+
   let nameInput = document.getElementById("player-name");
 
   // This listener will now ONLY trigger for the manual button
   if (startButton) {
-      startButton.addEventListener("click", function () {
-        quizScreen.style.display = "none";
+    startButton.addEventListener("click", function () {
+      // Only proceed if a name is entered
+      if (validateName()) {
+        setupScreen.style.display = "none";
+        quizScreen.style.display = "block";
 
         let form = document.createElement("form");
         form.id = "character-form";
-        quizScreen.innerHTML = "<h2>Character Quiz</h2>";
+
+        quizScreen.innerHTML = "<h2>Manual Character Creation</h2>";
         quizScreen.appendChild(form);
-      
+
         // ---- Helper: labelled dropdown ----
         function makeDropdown(labelText, id, name, optionList, isObject) {
           let lbl = document.createElement("label");
           lbl.textContent = labelText;
           lbl.htmlFor = id;
           form.appendChild(lbl);
-      
+
           let sel = document.createElement("select");
           sel.id = id;
           sel.name = name;
-      
+
           let def = document.createElement("option");
           def.value = "";
           def.textContent = "-- Select --";
           sel.appendChild(def);
-      
+
           if (isObject) {
             for (let key in optionList) {
               let opt = document.createElement("option");
@@ -678,11 +682,11 @@ window.addEventListener("load", function () {
               sel.appendChild(opt2);
             }
           }
-      
+
           form.appendChild(sel);
           return sel;
         }
-      
+
         // ---- SECTION 1-4: Basic dropdowns ----
         let speciesSelect = makeDropdown(
           "Choose Your Species:",
@@ -712,45 +716,45 @@ window.addEventListener("load", function () {
           ALIGNMENTS,
           false,
         );
-      
+
         // ---- SECTION 5: Class Skill Selection ----
         // Shown/updated whenever the player changes their class selection.
         // The player picks exactly skillCount skills from their class's allowed list.
         // Background-granted skills are shown as already checked and locked.
-      
+
         let skillHeading = document.createElement("h3");
         skillHeading.textContent = "Choose Your Skill Proficiencies";
         form.appendChild(skillHeading);
-      
+
         let skillNote = document.createElement("p");
         skillNote.className = "prototype-note";
         skillNote.id = "skill-note";
         skillNote.textContent =
           "Select a class above to see your available skill choices.";
         form.appendChild(skillNote);
-      
+
         let skillPickerDiv = document.createElement("div");
         skillPickerDiv.id = "skill-picker";
         form.appendChild(skillPickerDiv);
-      
+
         // Rebuild skill checkboxes whenever class or background changes
         function rebuildSkillPicker() {
           skillPickerDiv.innerHTML = "";
-      
+
           let chosenClass = classSelect.value;
           let chosenBg = bgSelect.value;
-      
+
           if (!chosenClass) {
             skillNote.textContent =
               "Select a class above to see your available skill choices.";
             return;
           }
-      
+
           let classInfo = CLASS_DATA[chosenClass];
           let bgSkills = chosenBg ? BACKGROUND_SKILLS[chosenBg] : [];
           let pool = classInfo.skillChoices;
           let count = classInfo.skillCount;
-      
+
           skillNote.textContent =
             "Your background grants: " +
             (bgSkills.length ? bgSkills.join(", ") : "none") +
@@ -762,7 +766,7 @@ window.addEventListener("load", function () {
             " from your class list below (max " +
             count +
             "):";
-      
+
           // Track how many class skills are checked
           function updateCheckboxStates() {
             let checkboxes = skillPickerDiv.querySelectorAll(
@@ -772,12 +776,12 @@ window.addEventListener("load", function () {
             checkboxes.forEach(function (cb) {
               if (cb.checked) checkedCount++;
             });
-      
+
             checkboxes.forEach(function (cb) {
               // Disable unchecked boxes once limit is reached
               cb.disabled = !cb.checked && checkedCount >= count;
             });
-      
+
             // Update the counter label
             let counter = document.getElementById("skill-counter");
             if (counter) {
@@ -785,28 +789,28 @@ window.addEventListener("load", function () {
               counter.style.color = checkedCount === count ? "green" : "inherit";
             }
           }
-      
+
           // Counter display
           let counter = document.createElement("p");
           counter.id = "skill-counter";
           counter.style.fontWeight = "bold";
           counter.textContent = "0 / " + count + " selected";
           skillPickerDiv.appendChild(counter);
-      
+
           // Render each skill in the class pool as a checkbox
           for (let i = 0; i < pool.length; i++) {
             let skillName = pool[i];
             let isBgGranted = bgSkills.indexOf(skillName) !== -1;
-      
+
             let row = document.createElement("div");
             row.style.cssText =
               "display:flex;align-items:center;gap:8px;margin:4px 0;";
-      
+
             let cb = document.createElement("input");
             cb.type = "checkbox";
             cb.value = skillName;
             cb.id = "skill-cb-" + skillName.replace(/\s/g, "-");
-      
+
             if (isBgGranted) {
               // Background-granted: pre-checked and locked, visually distinct
               cb.checked = true;
@@ -816,7 +820,7 @@ window.addEventListener("load", function () {
               cb.classList.add("class-skill");
               cb.addEventListener("change", updateCheckboxStates);
             }
-      
+
             let lbl = document.createElement("label");
             lbl.htmlFor = cb.id;
             lbl.textContent =
@@ -828,25 +832,25 @@ window.addEventListener("load", function () {
               lbl.style.cssText = "color:#888;font-style:italic;";
               lbl.textContent += " — from background";
             }
-      
+
             row.appendChild(cb);
             row.appendChild(lbl);
             skillPickerDiv.appendChild(row);
           }
-      
+
           // Also show background skills that aren't in the class pool (locked, informational)
           for (let b = 0; b < bgSkills.length; b++) {
             if (pool.indexOf(bgSkills[b]) === -1) {
               let extraRow = document.createElement("div");
               extraRow.style.cssText =
                 "display:flex;align-items:center;gap:8px;margin:4px 0;";
-      
+
               let extraCb = document.createElement("input");
               extraCb.type = "checkbox";
               extraCb.checked = true;
               extraCb.disabled = true;
               extraCb.classList.add("bg-skill");
-      
+
               let extraLbl = document.createElement("label");
               extraLbl.textContent =
                 bgSkills[b] +
@@ -855,74 +859,74 @@ window.addEventListener("load", function () {
                 ")" +
                 " — from background";
               extraLbl.style.cssText = "color:#888;font-style:italic;";
-      
+
               extraRow.appendChild(extraCb);
               extraRow.appendChild(extraLbl);
               skillPickerDiv.appendChild(extraRow);
             }
           }
-      
+
           updateCheckboxStates();
         }
-      
+
         classSelect.addEventListener("change", rebuildSkillPicker);
         bgSelect.addEventListener("change", rebuildSkillPicker);
-      
+
         // ---- SECTION 6: Equipment Selection ----
         // Shown/rebuilt when class changes. Each "pack" is a choice group;
         // always-items are shown locked. Player picks one option per group.
-      
+
         let equipHeading = document.createElement("h3");
         equipHeading.textContent = "Choose Your Starting Equipment";
         form.appendChild(equipHeading);
-      
+
         let equipNote = document.createElement("p");
         equipNote.className = "prototype-note";
         equipNote.id = "equip-note";
         equipNote.textContent = "Select a class above to see your equipment options.";
         form.appendChild(equipNote);
-      
+
         let equipPickerDiv = document.createElement("div");
         equipPickerDiv.id = "equip-picker";
         form.appendChild(equipPickerDiv);
-      
+
         // Track the radio group containers so we can collect values at submit
         let equipGroups = []; // [{type:"pick", radios:[...]}, {type:"always", items:[...]}]
-      
+
         function rebuildEquipPicker() {
           equipPickerDiv.innerHTML = "";
           equipGroups = [];
-      
+
           let chosenClass = classSelect.value;
           if (!chosenClass) {
             equipNote.textContent =
               "Select a class above to see your equipment options.";
             return;
           }
-      
+
           equipNote.textContent = "Choose one option from each group below:";
           let packs = CLASS_EQUIPMENT[chosenClass];
           if (!packs) return;
-      
+
           for (let p = 0; p < packs.length; p++) {
             let pack = packs[p];
-      
+
             let groupDiv = document.createElement("div");
             groupDiv.style.cssText =
               "border:1px solid #ccc;border-radius:6px;padding:10px;margin:8px 0;";
-      
+
             if (pack.always) {
               // Always-granted items — just show them, no choice needed
               let alwaysLabel = document.createElement("p");
               alwaysLabel.style.cssText = "font-weight:bold;margin:0 0 4px 0;";
               alwaysLabel.textContent = "Always included:";
               groupDiv.appendChild(alwaysLabel);
-      
+
               let alwaysList = document.createElement("p");
               alwaysList.style.margin = "0";
               alwaysList.textContent = pack.always.join(", ");
               groupDiv.appendChild(alwaysList);
-      
+
               equipGroups.push({ type: "always", items: pack.always });
             } else {
               // Pick-one group — render as radio buttons
@@ -930,120 +934,120 @@ window.addEventListener("load", function () {
               pickLabel.style.cssText = "font-weight:bold;margin:0 0 6px 0;";
               pickLabel.textContent = "Choose one:";
               groupDiv.appendChild(pickLabel);
-      
+
               let groupName = "equip-group-" + p;
               let radios = [];
-      
+
               for (let o = 0; o < pack.options.length; o++) {
                 let optionItems = pack.options[o];
                 let row = document.createElement("div");
                 row.style.cssText =
                   "display:flex;align-items:center;gap:8px;margin:4px 0;";
-      
+
                 let rb = document.createElement("input");
                 rb.type = "radio";
                 rb.name = groupName;
                 rb.value = JSON.stringify(optionItems);
                 rb.id = groupName + "-opt-" + o;
                 if (o === 0) rb.checked = true; // default to first option
-      
+
                 let rbl = document.createElement("label");
                 rbl.htmlFor = rb.id;
                 rbl.textContent = optionItems.join(" + ");
-      
+
                 row.appendChild(rb);
                 row.appendChild(rbl);
                 groupDiv.appendChild(row);
                 radios.push(rb);
               }
-      
+
               equipGroups.push({ type: "pick", radios: radios });
             }
-      
+
             equipPickerDiv.appendChild(groupDiv);
           }
         }
-      
+
         // Rebuild equipment picker whenever class changes
         classSelect.addEventListener("change", rebuildEquipPicker);
-      
+
         // ---- SECTION 7: Feat Selection ----
         let featHeading = document.createElement("h3");
         featHeading.textContent = "Choose Your Origin Feat";
         form.appendChild(featHeading);
-      
+
         let featNote = document.createElement("p");
         featNote.className = "prototype-note";
         featNote.textContent =
           "At level 1, every character gains one Origin Feat. Pick one from the list below.";
         form.appendChild(featNote);
-      
+
         let featPickerDiv = document.createElement("div");
         featPickerDiv.id = "feat-picker";
         featPickerDiv.style.cssText = "display:grid;gap:6px;";
         form.appendChild(featPickerDiv);
-      
+
         for (let f = 0; f < FEATS.length; f++) {
           let feat = FEATS[f];
           let row = document.createElement("div");
           row.style.cssText =
             "display:flex;align-items:flex-start;gap:10px;border:1px solid #ccc;border-radius:6px;padding:8px;";
-      
+
           let rb = document.createElement("input");
           rb.type = "radio";
           rb.name = "feat-choice";
           rb.value = feat.name;
           rb.id = "feat-" + f;
           if (f === 0) rb.checked = true;
-      
+
           let lbl = document.createElement("label");
           lbl.htmlFor = rb.id;
           lbl.innerHTML = "<strong>" + feat.name + "</strong> — " + feat.description;
           lbl.style.cursor = "pointer";
-      
+
           row.appendChild(rb);
           row.appendChild(lbl);
           featPickerDiv.appendChild(row);
         }
-      
+
         // ---- SECTION 8: Dice Rolling ----
         let diceHeading = document.createElement("h3");
         diceHeading.textContent = "Roll Your Ability Scores";
         form.appendChild(diceHeading);
-      
+
         let diceNote = document.createElement("p");
         diceNote.className = "prototype-note";
         diceNote.textContent =
           'Click "Roll Dice" to roll 4d6 for each ability score — the lowest die is dropped and the remaining three are summed. Then assign each result to a stat.';
         form.appendChild(diceNote);
-      
+
         let rollResultsDiv = document.createElement("div");
         rollResultsDiv.id = "roll-results";
         rollResultsDiv.style.cssText =
           "background:rgba(0,0,0,0.05);border:1px solid #ccc;border-radius:8px;padding:12px;margin:10px 0;display:none;";
         form.appendChild(rollResultsDiv);
-      
+
         let rollBtn = document.createElement("button");
         rollBtn.type = "button";
         rollBtn.className = "button";
         rollBtn.textContent = "🎲 Roll Dice";
         rollBtn.style.marginBottom = "16px";
         form.appendChild(rollBtn);
-      
+
         let statAssignDiv = document.createElement("div");
         statAssignDiv.id = "stat-assign";
         statAssignDiv.style.display = "none";
         form.appendChild(statAssignDiv);
-      
+
         let rolledScores = [];
         let statSelects = {};
-      
+
         rollBtn.addEventListener("click", function () {
           rolledScores = rollAllScores();
-      
+
           rollResultsDiv.style.display = "block";
           rollResultsDiv.innerHTML = "<strong>Your Rolls:</strong><br>";
-      
+
           for (let i = 0; i < rolledScores.length; i++) {
             let r = rolledScores[i];
             let line = document.createElement("p");
@@ -1068,32 +1072,32 @@ window.addEventListener("load", function () {
               "</strong>";
             rollResultsDiv.appendChild(line);
           }
-      
+
           statAssignDiv.style.display = "block";
           statAssignDiv.innerHTML =
             "<h3>Assign Scores to Stats</h3>" +
             "<p class='prototype-note'>Each roll can only be assigned to one stat. " +
             "If you rolled the same number twice, you may assign it twice.</p>";
-      
+
           statSelects = {};
-      
+
           for (let s = 0; s < STATS.length; s++) {
             let statName = STATS[s];
             let lbl = document.createElement("label");
             lbl.textContent = statName + ":";
             lbl.htmlFor = "stat-" + statName;
             statAssignDiv.appendChild(lbl);
-      
+
             let sel = document.createElement("select");
             sel.id = "stat-" + statName;
             sel.name = "stat-" + statName;
             sel.className = "stat-select";
-      
+
             let defOpt = document.createElement("option");
             defOpt.value = "";
             defOpt.textContent = "-- Assign a score --";
             sel.appendChild(defOpt);
-      
+
             // value = "rollIndex:total" so two rolls of 12 stay distinguishable
             for (let j = 0; j < rolledScores.length; j++) {
               let opt = document.createElement("option");
@@ -1101,44 +1105,44 @@ window.addEventListener("load", function () {
               opt.textContent = rolledScores[j].total;
               sel.appendChild(opt);
             }
-      
+
             statAssignDiv.appendChild(sel);
             statSelects[statName] = sel;
           }
-      
+
           rollBtn.textContent = "🎲 Re-Roll Dice";
         });
-      
+
         // ---- SECTION 7: Personality (multi-entry, max 3 each) ----
         let personalityHeading = document.createElement("h3");
         personalityHeading.textContent = "Character Personality";
         form.appendChild(personalityHeading);
-      
+
         function makeMultiEntry(labelText, fieldId, maxEntries) {
           maxEntries = maxEntries || 3;
           let wrapper = document.createElement("div");
           wrapper.className = "multi-entry-group";
           wrapper.style.marginBottom = "16px";
-      
+
           let groupLabel = document.createElement("p");
           groupLabel.style.fontWeight = "bold";
           groupLabel.style.marginBottom = "4px";
           groupLabel.textContent = labelText;
           wrapper.appendChild(groupLabel);
-      
+
           let entriesDiv = document.createElement("div");
           entriesDiv.id = fieldId + "-entries";
           wrapper.appendChild(entriesDiv);
-      
+
           let addBtn = document.createElement("button");
           addBtn.type = "button";
           addBtn.className = "button";
           addBtn.style.cssText = "font-size:0.8em;padding:4px 10px;margin-top:6px;";
           addBtn.textContent = "+ Add Another";
           wrapper.appendChild(addBtn);
-      
+
           form.appendChild(wrapper);
-      
+
           function addEntry() {
             if (entriesDiv.querySelectorAll("textarea").length >= maxEntries) return;
             let ta = document.createElement("textarea");
@@ -1152,10 +1156,10 @@ window.addEventListener("load", function () {
               addBtn.style.display = "none";
             }
           }
-      
+
           addEntry();
           addBtn.addEventListener("click", addEntry);
-      
+
           return function getValues() {
             let values = [];
             entriesDiv.querySelectorAll("textarea").forEach(function (ta) {
@@ -1165,7 +1169,7 @@ window.addEventListener("load", function () {
             return values;
           };
         }
-      
+
         let getTraits = makeMultiEntry(
           "Personality Traits:",
           "personality-traits",
@@ -1174,24 +1178,24 @@ window.addEventListener("load", function () {
         let getIdeals = makeMultiEntry("Ideals:", "ideals", 3);
         let getBonds = makeMultiEntry("Bonds:", "bonds", 3);
         let getFlaws = makeMultiEntry("Flaws:", "flaws", 3);
-      
+
         // ---- ERROR + SUBMIT ----
         let errorMsg = document.createElement("p");
         errorMsg.id = "error-message";
         errorMsg.style.cssText = "color:red;font-weight:bold;";
         errorMsg.textContent = "";
         form.appendChild(errorMsg);
-      
+
         let submitBtn = document.createElement("button");
         submitBtn.type = "button";
         submitBtn.className = "button";
         submitBtn.textContent = "Generate My Character!";
         form.appendChild(submitBtn);
-      
+
         // --------------------
         // EVENT LISTENERS
         // --------------------
-      
+
         startButton.addEventListener("click", function () {
           let characterName = nameInput.value.trim();
           if (characterName === "") {
@@ -1204,16 +1208,16 @@ window.addEventListener("load", function () {
             "Create Your Character: " + characterName;
           quizScreen.dataset.characterName = characterName;
         });
-      
+
         submitBtn.addEventListener("click", function () {
           errorMsg.textContent = "";
-      
+
           let characterName = quizScreen.dataset.characterName;
           let species = speciesSelect.value;
           let charClass = classSelect.value;
           let background = bgSelect.value;
           let alignment = alignSelect.value;
-      
+
           if (!species) {
             errorMsg.textContent = "Please choose a Species.";
             return;
@@ -1230,12 +1234,12 @@ window.addEventListener("load", function () {
             errorMsg.textContent = "Please choose an Alignment.";
             return;
           }
-      
+
           // ---- Validate skill selection ----
           let classInfo = CLASS_DATA[charClass];
           let bgSkills = BACKGROUND_SKILLS[background].slice();
           let requiredCount = classInfo.skillCount;
-      
+
           let checkedClassSkills = [];
           let classCheckboxes = skillPickerDiv.querySelectorAll(
             "input.class-skill:checked",
@@ -1243,7 +1247,7 @@ window.addEventListener("load", function () {
           classCheckboxes.forEach(function (cb) {
             checkedClassSkills.push(cb.value);
           });
-      
+
           if (checkedClassSkills.length !== requiredCount) {
             errorMsg.textContent =
               "Please select exactly " +
@@ -1256,17 +1260,17 @@ window.addEventListener("load", function () {
               ".";
             return;
           }
-      
+
           // ---- Validate dice were rolled ----
           if (rolledScores.length === 0) {
             errorMsg.textContent = "Please roll your ability scores first.";
             return;
           }
-      
+
           // ---- Collect & validate stat assignments ----
           let assignedStats = {};
           let usedRollIndices = [];
-      
+
           for (let s = 0; s < STATS.length; s++) {
             let statName = STATS[s];
             let val = statSelects[statName] ? statSelects[statName].value : "";
@@ -1277,7 +1281,7 @@ window.addEventListener("load", function () {
             let parts = val.split(":");
             let rollIndex = parts[0];
             let scoreTotal = parseInt(parts[1]);
-      
+
             if (usedRollIndices.indexOf(rollIndex) !== -1) {
               errorMsg.textContent =
                 "You assigned the same roll to " +
@@ -1288,20 +1292,20 @@ window.addEventListener("load", function () {
             usedRollIndices.push(rollIndex);
             assignedStats[statName] = scoreTotal;
           }
-      
+
           // Apply background stat bonuses (+1 to each of the three eligible stats)
           let bgStatBonuses = BACKGROUNDS[background].stats;
           for (let b = 0; b < bgStatBonuses.length; b++) {
             assignedStats[bgStatBonuses[b]] += 1;
           }
-      
+
           // ---- Calculate ability modifiers ----
           // formula: floor((score - 10) / 2)
           let modifiers = {};
           for (let m = 0; m < STATS.length; m++) {
             modifiers[STATS[m]] = abilityModifier(assignedStats[STATS[m]]);
           }
-      
+
           // ---- Determine all proficient skills ----
           // Background skills are auto-granted; class skills are what the player just picked.
           // Merge them, no duplicates.
@@ -1311,10 +1315,10 @@ window.addEventListener("load", function () {
               skillProficiencies.push(checkedClassSkills[ck]);
             }
           }
-      
+
           // Saving throw proficiencies: auto-assigned by class (fixed in 2024 PHB)
           let savingThrowProficiencies = classInfo.savingThrows.slice();
-      
+
           // ---- Calculate saving throw modifiers ----
           // Saved as raw modifier (stat mod) + a proficient flag.
           // The proficiency bonus (+2) is stored separately on the character object
@@ -1329,7 +1333,7 @@ window.addEventListener("load", function () {
               // calculated on the sheet so proficiency bonus is visible separately
             };
           }
-      
+
           // ---- Calculate skill modifiers ----
           // Same pattern: store the base modifier and proficiency flag separately.
           let skills = {};
@@ -1344,7 +1348,7 @@ window.addEventListener("load", function () {
               // total = baseMod + (proficient ? proficiencyBonus : 0)
             };
           }
-      
+
           // ---- Collect equipment choices ----
           let chosenEquipment = [];
           for (let eg = 0; eg < equipGroups.length; eg++) {
@@ -1367,7 +1371,7 @@ window.addEventListener("load", function () {
               }
             }
           }
-      
+
           // ---- Collect feat choice ----
           let chosenFeat = "";
           let featRadios = featPickerDiv.querySelectorAll("input[type=radio]");
@@ -1377,7 +1381,7 @@ window.addEventListener("load", function () {
               break;
             }
           }
-      
+
           // ---- Build weapon attack rows from equipment ----
           // For each piece of equipment that matches a weapon in WEAPON_STATS,
           // generate an attack entry. Duplicate weapons (e.g. two Daggers) each
@@ -1388,18 +1392,18 @@ window.addEventListener("load", function () {
             let itemName = chosenEquipment[we];
             let wStats = WEAPON_STATS[itemName];
             if (!wStats) continue;
-      
+
             // Count duplicates so we can label "Dagger 1", "Dagger 2"
             weaponsSeen[itemName] = (weaponsSeen[itemName] || 0) + 1;
             let displayName =
               weaponsSeen[itemName] > 1
                 ? itemName + " " + weaponsSeen[itemName]
                 : itemName;
-      
+
             let statMod = modifiers[wStats.stat];
             let attackBonus = statMod + PROFICIENCY_BONUS;
             let damageMod = statMod >= 0 ? "+" + statMod : "" + statMod;
-      
+
             weaponAttacks.push({
               name: displayName,
               attackBonus: (attackBonus >= 0 ? "+" : "") + attackBonus,
@@ -1408,7 +1412,7 @@ window.addEventListener("load", function () {
               notes: wStats.notes,
             });
           }
-      
+
           // Reset seen count so duplicate labels on second pass are correct
           weaponsSeen = {};
           for (let wa2 = 0; wa2 < weaponAttacks.length; wa2++) {
@@ -1422,7 +1426,7 @@ window.addEventListener("load", function () {
               weaponAttacks[wa3].name = bn; // remove trailing " 1" if only one copy
             }
           }
-      
+
           // ---- Apply feat effects to skills (Skilled feat) ----
           if (chosenFeat === "Skilled") {
             let allSkillNames2 = Object.keys(SKILL_STAT_MAP);
@@ -1436,19 +1440,19 @@ window.addEventListener("load", function () {
               }
             }
           }
-      
+
           // ---- Collect cantrips + spells (class magic + feat magic) ----
           let classMagic = CLASS_MAGIC[charClass] || { cantrips: [], spells: [] };
           let cantrips = classMagic.cantrips.slice();
           let spells = classMagic.spells.slice();
-      
+
           function mergeUnique(arr, additions) {
             for (let mu = 0; mu < additions.length; mu++) {
               if (arr.indexOf(additions[mu]) === -1) arr.push(additions[mu]);
             }
             return arr;
           }
-      
+
           if (chosenFeat === "Magic Initiate (Wizard)") {
             mergeUnique(cantrips, ["Fire Bolt", "Mage Hand"]);
             mergeUnique(spells, ["Magic Missile"]);
@@ -1461,7 +1465,7 @@ window.addEventListener("load", function () {
             mergeUnique(cantrips, ["Guidance", "Druidcraft"]);
             mergeUnique(spells, ["Entangle"]);
           }
-      
+
           // ---- Build and save character object ----
           let characterData = {
             name: characterName,
@@ -1495,10 +1499,11 @@ window.addEventListener("load", function () {
               flaws: getFlaws(),
             },
           };
-      
+
           localStorage.setItem("dndCharacter", JSON.stringify(characterData));
           window.location.href = "generated-character.html";
         });
-      });
+      }
+    });
   }
 });
