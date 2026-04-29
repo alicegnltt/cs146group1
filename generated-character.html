@@ -198,7 +198,7 @@
     </div>
 
 </main>
-
+<script src="security.js"></script>
 <script>
 // ============================================================
 //  Character Sheet Population Script
@@ -213,24 +213,38 @@ window.addEventListener("load", function () {
 
     let savedData = localStorage.getItem("dndCharacter");
     if (!savedData) return;
-    let character = JSON.parse(savedData);
+    let character = parseJSON(savedData);
+    if (!character) return;
+    if (!validateCharacter(character)) {
+        console.warn("Invalid character object in localStorage");
+        return;
+    }
 
     let profBonus = character.proficiencyBonus || 2;
 
     function fmt(n) { return (n >= 0 ? "+" : "") + n; }
 
+    // Helper to sanitize and limit text for insertion
+    function safeText(v, maxLen=200) {
+        return validateLength(sanitizeInput(v || ""), maxLen);
+    }
+    function safeArray(arr, maxLen=200) {
+        if (!Array.isArray(arr)) return [];
+        return arr.map(function(el){ return validateLength(sanitizeInput(String(el || "")), maxLen); });
+    }
+
     // ---- Basic info ----
-    document.getElementById("sheet-name").textContent       = character.name       || "";
-    document.getElementById("sheet-species").textContent    = character.species    || "";
-    document.getElementById("sheet-class").textContent      = character.charClass  || "";
-    document.getElementById("sheet-level").textContent      = character.level      || "";
-    document.getElementById("sheet-background").textContent = character.background || "";
-    document.getElementById("sheet-alignment").textContent  = character.alignment  || "";
+    document.getElementById("sheet-name").textContent       = safeText(character.name || "", 100);
+    document.getElementById("sheet-species").textContent    = safeText(character.species || "", 60);
+    document.getElementById("sheet-class").textContent      = safeText(character.charClass || "", 60);
+    document.getElementById("sheet-level").textContent      = safeText(String(character.level || ""), 10);
+    document.getElementById("sheet-background").textContent = safeText(character.background || "", 120);
+    document.getElementById("sheet-alignment").textContent  = safeText(character.alignment || "", 60);
 
     // ---- Ability scores ----
     ["Strength","Dexterity","Constitution","Intelligence","Wisdom","Charisma"].forEach(function(stat) {
         let box = document.getElementById("score-" + stat);
-        if (box && character.stats) box.textContent = character.stats[stat] || "";
+        if (box && character.stats) box.textContent = safeText(String(character.stats[stat] || ""), 6);
     });
 
     // ---- Proficiency Bonus ----
@@ -356,10 +370,12 @@ window.addEventListener("load", function () {
     if (tbody && character.weaponAttacks && character.weaponAttacks.length > 0) {
         character.weaponAttacks.forEach(function(w) {
             let tr = document.createElement("tr");
+            //edited with escapeHTML function to protext against xss attacks 
+            // by escaping any HTML in the weapon name and type
             tr.innerHTML =
-                "<td>" + w.name        + "</td>" +
-                "<td>" + w.attackBonus + "</td>" +
-                "<td>" + w.damage + " " + w.type + "</td>" +
+                "<td>" + escapeHTML(w.name)        + "</td>" +
+                "<td>" + escapeHTML(w.attackBonus) + "</td>" +
+                "<td>" + escapeHTML(w.damage + " " + w.type) + "</td>" +
             tbody.appendChild(tr);
         });
     }

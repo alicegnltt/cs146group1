@@ -43,7 +43,8 @@
             <h2>Create Your Character</h2>
 
             <label for="player-name">Character Name</label>
-            <input id="player-name" type="text" placeholder=" --- ">
+            <!-- adding a length cap-->
+            <input id="player-name" type="text" placeholder=" --- " maxlength="50">
 
             <button class="button">Start Character Quiz</button>
 
@@ -82,6 +83,8 @@
     </footer>
 
     <!-- Load the quiz script at the bottom so the page HTML loads first -->
+    <!-- Also load security scripts -->
+    <script src="security.js"></script>
     <script src="quiz.js"></script>
 
 </body>

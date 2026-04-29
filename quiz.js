@@ -982,7 +982,7 @@ window.addEventListener("load", function () {
 
     let lbl = document.createElement("label");
     lbl.htmlFor = rb.id;
-    lbl.innerHTML = "<strong>" + feat.name + "</strong> — " + feat.description;
+    lbl.innerHTML = "<strong>" + escapeHTML(validateLength(feat.name,100)) + "</strong> — " + escapeHTML(validateLength(feat.description,300));
     lbl.style.cursor = "pointer";
 
     row.appendChild(rb);
@@ -1144,7 +1144,7 @@ window.addEventListener("load", function () {
       let values = [];
       entriesDiv.querySelectorAll("textarea").forEach(function (ta) {
         let v = ta.value.trim();
-        if (v) values.push(v);
+        if (v) values.push(sanitizeInput(validateLength(v,300)));
       });
       return values;
     };
@@ -1184,9 +1184,10 @@ window.addEventListener("load", function () {
     }
     setupScreen.style.display = "none";
     quizScreen.style.display = "block";
+    let safeName = sanitizeInput(validateLength(characterName,100));
+    quizScreen.dataset.characterName = safeName;
     quizScreen.querySelector("h2").textContent =
-      "Create Your Character: " + characterName;
-    quizScreen.dataset.characterName = characterName;
+      "Create Your Character: " + safeName;
   });
 
   submitBtn.addEventListener("click", function () {
@@ -1447,35 +1448,42 @@ window.addEventListener("load", function () {
 
     // ---- Build and save character object ----
     let characterData = {
-      name: characterName,
-      species: species,
-      charClass: charClass,
-      background: background,
-      alignment: alignment,
+      name: sanitizeInput(validateLength(characterName,100)),
+      species: sanitizeInput(validateLength(species || "",60)),
+      charClass: sanitizeInput(validateLength(charClass || "",60)),
+      background: sanitizeInput(validateLength(background || "",120)),
+      alignment: sanitizeInput(validateLength(alignment || "",60)),
       level: 1,
       proficiencyBonus: PROFICIENCY_BONUS,
       stats: assignedStats,
       modifiers: modifiers,
       savingThrows: savingThrows,
       skills: skills,
-      skillProficiencies: skillProficiencies,
-      savingThrowProficiencies: savingThrowProficiencies,
-      equipment: chosenEquipment,
-      weaponAttacks: weaponAttacks,
-      feat: chosenFeat,
-      featDescription: (function () {
+      skillProficiencies: skillProficiencies.map(s=>sanitizeInput(validateLength(s,60))),
+      savingThrowProficiencies: savingThrowProficiencies.map(s=>sanitizeInput(validateLength(s,60))),
+      equipment: chosenEquipment.map(i=>sanitizeInput(validateLength(i,100))),
+      weaponAttacks: weaponAttacks.map(function(w){
+        return {
+          name: sanitizeInput(validateLength(w.name,120)),
+          attackBonus: sanitizeInput(validateLength(w.attackBonus,10)),
+          damage: sanitizeInput(validateLength(w.damage,40)),
+          type: sanitizeInput(validateLength(w.type,40))
+        };
+      }),
+      feat: sanitizeInput(validateLength(chosenFeat,80)),
+      featDescription: sanitizeInput(validateLength((function () {
         for (let fd = 0; fd < FEATS.length; fd++) {
           if (FEATS[fd].name === chosenFeat) return FEATS[fd].description;
         }
         return "";
-      })(),
-      cantrips: cantrips,
-      spells: spells,
+      })(),300)),
+      cantrips: cantrips.map(c=>sanitizeInput(validateLength(c,120))),
+      spells: spells.map(s=>sanitizeInput(validateLength(s,120))),
       personality: {
-        traits: getTraits(),
-        ideals: getIdeals(),
-        bonds: getBonds(),
-        flaws: getFlaws(),
+        traits: getTraits().map(t=>sanitizeInput(validateLength(t,300))),
+        ideals: getIdeals().map(t=>sanitizeInput(validateLength(t,300))),
+        bonds: getBonds().map(t=>sanitizeInput(validateLength(t,300))),
+        flaws: getFlaws().map(t=>sanitizeInput(validateLength(t,300))),
       },
     };
 
