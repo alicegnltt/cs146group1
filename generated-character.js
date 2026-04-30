@@ -1,54 +1,14 @@
 // generated-character.js
-// Populates generated-character.html using the character saved by quiz.js
 
 window.addEventListener("load", function () {
     const savedData = localStorage.getItem("dndCharacter");
     if (!savedData) return;
 
-    const character = JSON.parse(savedData);
-    const profBonus = character.proficiencyBonus || 2;
+    const character = parseCharacter(savedData);
+    if (!character) return;
 
-    function fmt(n) {
-        return (n >= 0 ? "+" : "") + n;
-    }
+    const profBonus = safeNumber(character.proficiencyBonus, 2);
 
-    function safeText(id, value) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = value || "";
-    }
-
-    function joinPersonality(value) {
-        if (!value) return "";
-        if (Array.isArray(value)) return value.join(" • ");
-        return value;
-    }
-
-    // ---- Basic info ----
-    safeText("sheet-name", character.name);
-    safeText("sheet-species", character.species);
-    safeText("sheet-class", character.charClass);
-    safeText("sheet-level", character.level);
-    safeText("sheet-background", character.background);
-    safeText("sheet-alignment", character.alignment);
-
-    // ---- Ability scores ----
-    const statNames = [
-        "Strength",
-        "Dexterity",
-        "Constitution",
-        "Intelligence",
-        "Wisdom",
-        "Charisma"
-    ];
-
-    statNames.forEach(function (stat) {
-        safeText("score-" + stat, character.stats ? character.stats[stat] : "");
-    });
-
-    // ---- Proficiency Bonus ----
-    safeText("sheet-prof-bonus", fmt(profBonus));
-
-    // ---- Max HP ----
     const HIT_DICE = {
         Barbarian: 12,
         Fighter: 10,
@@ -64,65 +24,15 @@ window.addEventListener("load", function () {
         Wizard: 6
     };
 
-    const conMod = character.modifiers ? character.modifiers.Constitution || 0 : 0;
-    const hitDie = HIT_DICE[character.charClass] || 8;
-    const toughBonus = character.feat === "Tough" ? 2 : 0;
+    const statNames = [
+        "Strength",
+        "Dexterity",
+        "Constitution",
+        "Intelligence",
+        "Wisdom",
+        "Charisma"
+    ];
 
-    let maxHp = hitDie + conMod + toughBonus;
-    if (maxHp < 1) maxHp = 1;
-
-    safeText("sheet-max-hp", maxHp);
-    safeText("sheet-current-hp", maxHp);
-    safeText("sheet-hit-dice", character.hitDie || "");
-
-    // ---- Speed / AC / Initiative ----
-    const dexMod = character.modifiers ? character.modifiers.Dexterity || 0 : 0;
-
-    safeText("sheet-speed", "30 ft");
-
-    let ac = 10 + dexMod;
-
-    if (character.equipment) {
-        const equip = character.equipment;
-
-        if (equip.indexOf("Chain Mail") !== -1) {
-            ac = 16;
-        } else if (equip.indexOf("Scale Mail") !== -1) {
-            ac = 14 + Math.min(dexMod, 2);
-        } else if (equip.indexOf("Chain Shirt") !== -1) {
-            ac = 13 + Math.min(dexMod, 2);
-        } else if (equip.indexOf("Leather Armor") !== -1) {
-            ac = 11 + dexMod;
-        } else if (equip.indexOf("Studded Leather") !== -1) {
-            ac = 12 + dexMod;
-        }
-
-        if (equip.indexOf("Shield") !== -1) {
-            ac += 2;
-        }
-    }
-
-    safeText("sheet-ac", ac);
-    safeText("sheet-initiative", fmt(dexMod));
-
-    // ---- Saving Throws ----
-    if (character.savingThrows) {
-        statNames.forEach(function (stat) {
-            const stData = character.savingThrows[stat];
-            if (!stData) return;
-
-            const total = stData.baseMod + (stData.proficient ? profBonus : 0);
-
-            safeText("st-" + stat, fmt(total));
-
-            const dot = document.getElementById("st-dot-" + stat);
-            if (dot && stData.proficient) {
-                dot.classList.add("dot-filled");
-            }
-        });
-    }
-
-    // ---- Skills ----
     const allSkills = [
         "Acrobatics",
         "Animal Handling",
@@ -144,103 +54,248 @@ window.addEventListener("load", function () {
         "Survival"
     ];
 
-    if (character.skills) {
-        allSkills.forEach(function (skill) {
-            const skData = character.skills[skill];
-            if (!skData) return;
+    function parseCharacter(data) {
+        try {
+            const parsed = JSON.parse(data);
 
-            const total = skData.baseMod + (skData.proficient ? profBonus : 0);
+            if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+                console.warn("Invalid character data.");
+                return null;
+            }
 
-            safeText("sk-" + skill, fmt(total));
+            return parsed;
+        } catch (error) {
+            console.warn("Could not parse character data.");
+            return null;
+        }
+    }
 
-            const dot = document.getElementById("sk-dot-" + skill);
-            if (dot && skData.proficient) {
+    function safeText(value, maxLength = 200) {
+        if (value === null || value === undefined) return "";
+
+        return String(value)
+            .replace(/[<>]/g, "")
+            .trim()
+            .slice(0, maxLength);
+    }
+
+    function safeNumber(value, fallback = 0) {
+        const number = Number(value);
+        return Number.isFinite(number) ? number : fallback;
+    }
+
+    function fmt(value) {
+        const number = safeNumber(value, 0);
+        return number >= 0 ? "+" + number : String(number);
+    }
+
+    function setText(id, value, maxLength = 200) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = safeText(value, maxLength);
+    }
+
+    function joinSafe(value) {
+        if (Array.isArray(value)) {
+            return value.map(item => safeText(item, 100)).join(" • ");
+        }
+
+        return safeText(value, 200);
+    }
+
+    function hasEquipment(name) {
+        if (!Array.isArray(character.equipment)) return false;
+
+        return character.equipment.some(function (item) {
+            return safeText(item, 100) === name;
+        });
+    }
+
+    // Basic info
+    setText("sheet-name", character.name, 100);
+    setText("sheet-species", character.species, 60);
+    setText("sheet-class", character.charClass, 60);
+    setText("sheet-level", character.level, 10);
+    setText("sheet-background", character.background, 120);
+    setText("sheet-alignment", character.alignment, 60);
+
+    // Ability scores
+    statNames.forEach(function (stat) {
+        const score = character.stats && character.stats[stat];
+        setText("score-" + stat, safeNumber(score, ""), 6);
+    });
+
+    // Proficiency bonus
+    setText("sheet-prof-bonus", fmt(profBonus), 10);
+
+    // HP and hit dice
+    const charClass = safeText(character.charClass, 60);
+    const conMod = character.modifiers
+        ? safeNumber(character.modifiers.Constitution, 0)
+        : 0;
+
+    const hitDie = HIT_DICE[charClass] || 8;
+    const level = safeNumber(character.level, 1);
+    const toughBonus = character.feat === "Tough" ? 2 * level : 0;
+
+    let maxHp = hitDie + conMod + toughBonus;
+    if (maxHp < 1) maxHp = 1;
+
+    setText("sheet-max-hp", maxHp, 10);
+    setText("sheet-current-hp", maxHp, 10);
+    setText("sheet-hit-dice", "1d" + hitDie, 20);
+
+    // Speed, AC, initiative
+    const dexMod = character.modifiers
+        ? safeNumber(character.modifiers.Dexterity, 0)
+        : 0;
+
+    setText("sheet-speed", "30 ft", 20);
+    setText("sheet-initiative", fmt(dexMod), 10);
+
+    let ac = 10 + dexMod;
+
+    if (hasEquipment("Chain Mail")) {
+        ac = 16;
+    } else if (hasEquipment("Scale Mail")) {
+        ac = 14 + Math.min(dexMod, 2);
+    } else if (hasEquipment("Chain Shirt")) {
+        ac = 13 + Math.min(dexMod, 2);
+    } else if (hasEquipment("Studded Leather")) {
+        ac = 12 + dexMod;
+    } else if (hasEquipment("Leather Armor")) {
+        ac = 11 + dexMod;
+    }
+
+    if (hasEquipment("Shield")) ac += 2;
+
+    setText("sheet-ac", ac, 10);
+
+    // Saving throws
+    if (character.savingThrows && typeof character.savingThrows === "object") {
+        statNames.forEach(function (stat) {
+            const data = character.savingThrows[stat];
+            if (!data || typeof data !== "object") return;
+
+            const baseMod = safeNumber(data.baseMod, 0);
+            const total = baseMod + (data.proficient ? profBonus : 0);
+
+            setText("st-" + stat, fmt(total), 10);
+
+            const dot = document.getElementById("st-dot-" + stat);
+            if (dot && data.proficient) {
                 dot.classList.add("dot-filled");
             }
         });
     }
 
-    // ---- Passive Perception ----
+    // Skills
+    if (character.skills && typeof character.skills === "object") {
+        allSkills.forEach(function (skill) {
+            const data = character.skills[skill];
+            if (!data || typeof data !== "object") return;
+
+            const baseMod = safeNumber(data.baseMod, 0);
+            const total = baseMod + (data.proficient ? profBonus : 0);
+
+            setText("sk-" + skill, fmt(total), 10);
+
+            const dot = document.getElementById("sk-dot-" + skill);
+            if (dot && data.proficient) {
+                dot.classList.add("dot-filled");
+            }
+        });
+    }
+
+    // Passive perception
     if (character.skills && character.skills.Perception) {
         const perception = character.skills.Perception;
-        const perceptionTotal =
-            perception.baseMod + (perception.proficient ? profBonus : 0);
+        const percTotal =
+            safeNumber(perception.baseMod, 0) +
+            (perception.proficient ? profBonus : 0);
 
-        safeText("sheet-passive-perception", 10 + perceptionTotal);
+        setText("sheet-passive-perception", 10 + percTotal, 10);
     }
 
-    // ---- Personality ----
-    if (character.personality) {
-        safeText("sheet-traits", joinPersonality(character.personality.traits));
-        safeText("sheet-ideals", joinPersonality(character.personality.ideals));
-        safeText("sheet-bonds", joinPersonality(character.personality.bonds));
-        safeText("sheet-flaws", joinPersonality(character.personality.flaws));
-    }
+    // Personality
+    const personality = character.personality || {};
 
-    // ---- Weapon Attacks ----
+    setText("sheet-traits", joinSafe(personality.traits), 300);
+    setText("sheet-ideals", joinSafe(personality.ideals), 300);
+    setText("sheet-bonds", joinSafe(personality.bonds), 300);
+    setText("sheet-flaws", joinSafe(personality.flaws), 300);
+
+    // Weapon attacks
     const tbody = document.getElementById("attacks-tbody");
+
     if (tbody) {
-        tbody.innerHTML = "";
+        tbody.textContent = "";
 
-        if (character.weaponAttacks && character.weaponAttacks.length > 0) {
+        if (Array.isArray(character.weaponAttacks)) {
             character.weaponAttacks.forEach(function (weapon) {
-                const row = document.createElement("tr");
+                if (!weapon || typeof weapon !== "object") return;
 
-                row.innerHTML =
-                    "<td>" + weapon.name + "</td>" +
-                    "<td>" + weapon.attackBonus + "</td>" +
-                    "<td>" + weapon.damage + " " + weapon.type + "</td>";
+                const tr = document.createElement("tr");
 
-                tbody.appendChild(row);
+                const nameTd = document.createElement("td");
+                nameTd.textContent = safeText(weapon.name, 80);
+
+                const attackTd = document.createElement("td");
+                attackTd.textContent = safeText(weapon.attackBonus, 40);
+
+                const damageTd = document.createElement("td");
+                damageTd.textContent =
+                    safeText(weapon.damage, 40) + " " + safeText(weapon.type, 40);
+
+                tr.appendChild(nameTd);
+                tr.appendChild(attackTd);
+                tr.appendChild(damageTd);
+
+                tbody.appendChild(tr);
             });
         }
     }
 
-    // ---- Cantrips & Spells ----
+    // Cantrips and spells
     const spellsSection = document.getElementById("spells-section");
-    const hasCantrips = character.cantrips && character.cantrips.length > 0;
-    const hasSpells = character.spells && character.spells.length > 0;
+    const hasCantrips = Array.isArray(character.cantrips) && character.cantrips.length > 0;
+    const hasSpells = Array.isArray(character.spells) && character.spells.length > 0;
 
     if (hasCantrips || hasSpells) {
         if (spellsSection) spellsSection.style.display = "block";
 
-        safeText(
+        setText(
             "sheet-cantrips",
-            hasCantrips ? character.cantrips.join(", ") : "None"
+            hasCantrips ? character.cantrips.map(item => safeText(item, 80)).join(", ") : "None",
+            500
         );
 
-        safeText(
+        setText(
             "sheet-spells",
-            hasSpells ? character.spells.join(", ") : "None"
+            hasSpells ? character.spells.map(item => safeText(item, 80)).join(", ") : "None",
+            500
         );
     }
 
-    // ---- Feat ----
-    safeText("sheet-feat-name", character.feat);
-    safeText("sheet-feat-desc", character.featDescription);
+    // Feat
+    setText("sheet-feat-name", character.feat, 100);
+    setText("sheet-feat-desc", character.featDescription, 300);
 
-    // ---- Equipment ----
+    // Equipment
     const equipEl = document.getElementById("sheet-equipment");
 
-    if (equipEl && character.equipment && character.equipment.length > 0) {
+    if (equipEl && Array.isArray(character.equipment)) {
         const counts = {};
         const displayItems = [];
-        const seen = {};
 
         character.equipment.forEach(function (item) {
-            counts[item] = (counts[item] || 0) + 1;
+            const cleanItem = safeText(item, 100);
+            if (!cleanItem) return;
+
+            counts[cleanItem] = (counts[cleanItem] || 0) + 1;
         });
 
-        character.equipment.forEach(function (item) {
-            if (seen[item]) return;
-
-            seen[item] = true;
-
-            if (counts[item] > 1) {
-                displayItems.push(item + " x" + counts[item]);
-            } else {
-                displayItems.push(item);
-            }
+        Object.keys(counts).forEach(function (item) {
+            displayItems.push(counts[item] > 1 ? item + " x" + counts[item] : item);
         });
 
         equipEl.textContent = displayItems.join(", ");
