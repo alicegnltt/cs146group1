@@ -1,7 +1,7 @@
-<!-- Alice -->
+<!-- Alice  -->
 <!-- Character Creation Page -->
-<!-- W3 checked -->
 
+<!-- W3 checked -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,15 +31,18 @@
                     <li><a href="generated-character.html">Generated Character</a></li>
                 </ul>
             </nav>
+            <button id="dark-mode-btn">🌙 Dark Mode</button>
+
         </div>
     </header>
 
     <main class="container">
+
         <section id="setup-screen" class="card character-start-card">
             <h2>Create Your Character</h2>
 
             <label for="player-name">Character Name</label>
-            <input id="player-name" type="text" placeholder=" --- ">
+            <input id="player-name" type="text" placeholder=" --- " maxlength="50">
 
             <p id="name-error" class="error-message"></p>
 
@@ -47,7 +50,7 @@
                 <button id="auto-quiz-btn" class="button" type="button">
                     Take the Quiz
                 </button>
-            
+
                 <button id="manual-btn" class="button secondary-button" type="button">
                     Pick Manually
                 </button>
@@ -59,10 +62,19 @@
             <p id="question-text"></p>
             <div id="options-container"></div>
         </section>
+
     </main>
 
+    <footer class="site-footer">
+        <div class="container">
+            <p>CS Project • Dungeons & Dragons Beginner Website • 2026</p>
+        </div>
+    </footer>
+
+    <script src="security.js"></script>
     <script src="quiz.js"></script>
     <script src="scripts.js"></script>
+    <script src="site.js"></script>
 
 </body>
 
