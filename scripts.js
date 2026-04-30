@@ -1131,3 +1131,232 @@ function resetQuizState() {
         spells: []
     };
 }
+
+// ===============================
+// Generated Character Page Logic
+// ===============================
+
+window.addEventListener("load", function () {
+    const savedData = localStorage.getItem("dndCharacter");
+
+    if (!savedData) {
+        alert("No character found. Please create a character first.");
+        window.location.href = "create-character.html";
+        return;
+    }
+
+    const character = JSON.parse(savedData);
+
+    function getModifier(score) {
+        return Math.floor((score - 10) / 2);
+    }
+
+    function formatBonus(num) {
+        return num >= 0 ? "+" + num : "" + num;
+    }
+
+    function safeHTML(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = value || "None";
+    }
+
+    function safeText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value || "None";
+    }
+
+    function listHTML(value) {
+        if (Array.isArray(value)) {
+            return value.length
+                ? value.map(item => `<div>${item}</div>`).join("")
+                : "None";
+        }
+        return value || "None";
+    }
+
+    const abilityMap = {
+        Strength: "STR",
+        Dexterity: "DEX",
+        Constitution: "CON",
+        Intelligence: "INT",
+        Wisdom: "WIS",
+        Charisma: "CHA"
+    };
+
+    const skillMap = {
+        Acrobatics: "DEX",
+        "Animal Handling": "WIS",
+        Arcana: "INT",
+        Athletics: "STR",
+        Deception: "CHA",
+        History: "INT",
+        Insight: "WIS",
+        Intimidation: "CHA",
+        Investigation: "INT",
+        Medicine: "WIS",
+        Nature: "INT",
+        Perception: "WIS",
+        Performance: "CHA",
+        Persuasion: "CHA",
+        Religion: "INT",
+        "Sleight of Hand": "DEX",
+        Stealth: "DEX",
+        Survival: "WIS"
+    };
+
+    // Saving Throws
+    const savingThrowList = document.getElementById("sheet-saving-throws-list");
+    if (savingThrowList) {
+        savingThrowList.innerHTML = "";
+
+        Object.keys(abilityMap).forEach(abilityName => {
+            const abilityKey = abilityMap[abilityName];
+            const isProficient = character.savingThrows.includes(abilityName);
+
+            let bonus = getModifier(character.abilities[abilityKey]);
+            if (isProficient) bonus += character.proficiencyBonus;
+
+            const li = document.createElement("li");
+            li.textContent =
+                (isProficient ? "● " : "○ ") +
+                formatBonus(bonus) +
+                " " +
+                abilityName;
+
+            savingThrowList.appendChild(li);
+        });
+    }
+
+    // Skills
+    const skillsList = document.getElementById("sheet-skills-list");
+    if (skillsList) {
+        skillsList.innerHTML = "";
+
+        Object.keys(skillMap).forEach(skillName => {
+            const abilityKey = skillMap[skillName];
+            const isProficient = character.skillProficiencies.includes(skillName);
+
+            let bonus = getModifier(character.abilities[abilityKey]);
+            if (isProficient) bonus += character.proficiencyBonus;
+
+            const li = document.createElement("li");
+            li.textContent =
+                (isProficient ? "● " : "○ ") +
+                formatBonus(bonus) +
+                " " +
+                skillName +
+                " (" + abilityKey + ")";
+
+            skillsList.appendChild(li);
+        });
+    }
+
+    function abilityScoreHTML(score) {
+        const mod = getModifier(score);
+        const modText = mod >= 0 ? "+" + mod : mod;
+
+        return `
+            <div class="ability-score-number">${score}</div>
+            <div class="ability-score-mod">(${modText})</div>
+        `;
+    }
+
+    // Ability scores
+    const abilityIds = {
+        "score-Strength": "STR",
+        "score-Dexterity": "DEX",
+        "score-Constitution": "CON",
+        "score-Intelligence": "INT",
+        "score-Wisdom": "WIS",
+        "score-Charisma": "CHA"
+    };
+
+    Object.entries(abilityIds).forEach(([id, key]) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = abilityScoreHTML(character.abilities[key]);
+    });
+
+    // Basic info
+    safeText("sheet-name", character.name);
+    safeText("sheet-species", character.species);
+    safeText("sheet-class", character.class);
+    safeText("sheet-subclass", character.subclass);
+    safeText("sheet-level", character.level);
+    safeText("sheet-background", character.background);
+    safeText("sheet-alignment", character.alignment || "Neutral");
+
+    // Stats
+    safeText("sheet-max-hp", character.hpMax);
+    safeText("sheet-current-hp", character.hpCurrent);
+    safeText("sheet-hit-dice", character.hitDie);
+    safeText("sheet-armor-class", character.armorClass);
+    safeText("sheet-speed", character.speed + " ft.");
+
+    const initiative =
+        character.initiative >= 0
+            ? "+" + character.initiative
+            : character.initiative;
+    safeText("sheet-initiative", initiative);
+
+    safeText("sheet-passive-perception", character.passivePerception);
+    safeText("sheet-proficiency", "+" + character.proficiencyBonus);
+
+    // Lists
+    safeHTML("sheet-languages", listHTML(character.languages));
+    safeHTML("sheet-tools", listHTML(character.toolProficiencies));
+    safeHTML("sheet-armor-training", listHTML(character.armorTraining));
+    safeHTML("sheet-weapon-training", listHTML(character.weaponTraining));
+
+    safeHTML("sheet-class-features", listHTML(character.classFeatures));
+    safeHTML("sheet-species-traits", listHTML(character.speciesTraits));
+    safeHTML("sheet-feats", listHTML(character.feats));
+    safeHTML("sheet-equipment", listHTML(character.equipment));
+
+    safeText("sheet-inspiration", character.inspiration ? "Yes" : "None");
+
+    // Spells
+    safeText("sheet-spell-ability", character.spellcastingAbility || "None");
+    safeText("sheet-spell-save-dc", character.spellSaveDC || "None");
+    safeText(
+        "sheet-spell-attack",
+        character.spellAttackBonus
+            ? "+" + character.spellAttackBonus
+            : "None"
+    );
+
+    safeText(
+        "sheet-cantrips",
+        character.cantrips?.length
+            ? character.cantrips.join(", ")
+            : "None"
+    );
+
+    safeText(
+        "sheet-spells",
+        character.spells?.length
+            ? character.spells.join(", ")
+            : "None"
+    );
+
+    // Weapons
+    const weaponsTable = document.getElementById("sheet-weapons");
+    if (weaponsTable) {
+        weaponsTable.innerHTML = "";
+
+        if (character.weapons?.length) {
+            character.weapons.forEach(weapon => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${weapon.name}</td>
+                    <td>${weapon.attackBonus}</td>
+                    <td>${weapon.damage} ${weapon.type}</td>
+                `;
+
+                weaponsTable.appendChild(row);
+            });
+        } else {
+            weaponsTable.innerHTML = `<tr><td colspan="3">None</td></tr>`;
+        }
+    }
+});

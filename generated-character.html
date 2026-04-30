@@ -9,8 +9,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DnD Character Sheet</title>
-    <link rel="stylesheet" href="character-sheet-style.css">
-
+    <link rel="stylesheet" href="quiz-character-style.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
@@ -18,15 +18,23 @@
 
 <body>
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>D&D Beginner Portal</title>
-        <link rel="stylesheet" href="style.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
-    </head>
+    <header class="site-header">
+        <div class="container header-inner">
+            <h1 class="site-title">D&D Beginner Portal</h1>
+
+            <nav aria-label="Main navigation">
+                <ul class="nav-list">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="create-character.html">Create Character</a></li>
+                    <li><a href="how-to-play.html">How to Play</a></li>
+                    <li><a href="keywords.html">Keywords</a></li>
+                    <li><a href="generated-from-quiz.html"class="active" >Generated Character</a></li>
+                </ul>
+            </nav>
+            <button id="dark-mode-btn">🌙 Dark Mode</button>
+
+        </div>
+    </header>
 
     <main>
 
@@ -201,10 +209,11 @@
 
                 <div class="row grow">
                     <div class="box-section">
-                        <h2>Other Proficiencies &amp; Languages</h2>
+                        <h2>Languages</h2>
                     </div>
                     <div class="box-section">
                         <h2>Hit Dice</h2>
+                        <p id="sheet-hit-dice"></p>
                     </div>
                 </div>
             </div>
@@ -277,209 +286,8 @@
 
     </main>
 
-    <script>
-        // ============================================================
-        //  Character Sheet Population Script
-        //  Reads character data saved by quiz.js and populates the sheet.
-        //
-        //  Key rule: quiz.js stores baseMod (ability modifier only) and
-        //  a proficient flag on each saving throw and skill.
-        //  This script adds the proficiency bonus (+2 at level 1) on top
-        //  when proficient, so the bonus is visible as its own field.
-        // =====================================================<script>
-        window.addEventListener("load", function () {
-
-            let savedData = localStorage.getItem("dndCharacter");
-            if (!savedData) return;
-            let character = JSON.parse(savedData);
-
-            let profBonus = character.proficiencyBonus || 2;
-
-            function fmt(n) { return (n >= 0 ? "+" : "") + n; }
-
-            // ---- Basic info ----
-            document.getElementById("sheet-name").textContent = character.name || "";
-            document.getElementById("sheet-species").textContent = character.species || "";
-            document.getElementById("sheet-class").textContent = character.charClass || "";
-            document.getElementById("sheet-level").textContent = character.level || "";
-            document.getElementById("sheet-background").textContent = character.background || "";
-            document.getElementById("sheet-alignment").textContent = character.alignment || "";
-
-            // ---- Ability scores ----
-            ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"].forEach(function (stat) {
-                let box = document.getElementById("score-" + stat);
-                if (box && character.stats) box.textContent = character.stats[stat] || "";
-            });
-
-            // ---- Proficiency Bonus ----
-            let profEl = document.getElementById("sheet-prof-bonus");
-            if (profEl) profEl.textContent = fmt(profBonus);
-
-            // ---- Max HP ----
-            // Level 1 Max HP = hit die maximum + CON modifier
-            // 2024 PHB hit dice per class:
-            //   d12: Barbarian
-            //   d10: Fighter, Paladin, Ranger
-            //   d8:  Bard, Cleric, Druid, Monk, Rogue, Warlock
-            //   d6:  Sorcerer, Wizard
-            let HIT_DICE = {
-                Barbarian: 12,
-                Fighter: 10, Paladin: 10, Ranger: 10,
-                Bard: 8, Cleric: 8, Druid: 8, Monk: 8, Rogue: 8, Warlock: 8,
-                Sorcerer: 6, Wizard: 6
-            };
-            let conMod = character.modifiers ? (character.modifiers["Constitution"] || 0) : 0;
-            let hitDie = HIT_DICE[character.charClass] || 8;
-
-            // Tough feat adds 2 HP per level (+2 at level 1)
-            let toughBonus = (character.feat === "Tough") ? 2 : 0;
-            let maxHp = hitDie + conMod + toughBonus;
-            // HP can never be below 1
-            if (maxHp < 1) maxHp = 1;
-
-            let maxHpEl = document.getElementById("sheet-max-hp");
-            if (maxHpEl) maxHpEl.textContent = maxHp;
-
-            // ---- Speed, Armor Class, Initiative ----
-            // Speed: all classes move 30ft at level 1 (species letiations not yet tracked)
-            // Armor Class: 10 + DEX modifier when unarmored. If armor in equipment, use that value.
-            //   Light armor (Leather): 11 + DEX mod
-            //   Medium armor (Scale Mail, Chain Shirt): 14 + DEX mod (max +2)
-            //   Heavy armor (Chain Mail): 16, no DEX
-            // Initiative: DEX modifier
-            let dexMod = character.modifiers ? (character.modifiers["Dexterity"] || 0) : 0;
-
-            let speed = 30; // base speed for all classes/species at level 1
-            let speedEl = document.getElementById("sheet-speed");
-            if (speedEl) speedEl.textContent = speed + " ft";
-
-            let ac = 10 + dexMod; // unarmored default
-            if (character.equipment) {
-                let equip = character.equipment;
-                if (equip.indexOf("Chain Mail") !== -1) {
-                    ac = 16; // heavy armor, no DEX bonus
-                } else if (equip.indexOf("Scale Mail") !== -1) {
-                    ac = 14 + Math.min(dexMod, 2); // medium armor, DEX max +2
-                } else if (equip.indexOf("Chain Shirt") !== -1) {
-                    ac = 13 + Math.min(dexMod, 2);
-                } else if (equip.indexOf("Leather Armor") !== -1) {
-                    ac = 11 + dexMod; // light armor
-                } else if (equip.indexOf("Studded Leather") !== -1) {
-                    ac = 12 + dexMod;
-                }
-                // Shield adds +2 on top
-                if (equip.indexOf("Shield") !== -1) ac += 2;
-            }
-            let acEl = document.getElementById("sheet-ac");
-            if (acEl) acEl.textContent = ac;
-
-            let initiative = dexMod;
-            let initEl = document.getElementById("sheet-initiative");
-            if (initEl) initEl.textContent = fmt(initiative);
-
-            // ---- Saving Throws ----
-            let statNames = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
-            if (character.savingThrows) {
-                statNames.forEach(function (sName) {
-                    let stData = character.savingThrows[sName];
-                    if (!stData) return;
-                    let total = stData.baseMod + (stData.proficient ? profBonus : 0);
-                    let stSpan = document.getElementById("st-" + sName);
-                    if (stSpan) stSpan.textContent = fmt(total);
-                    let stDot = document.getElementById("st-dot-" + sName);
-                    if (stDot && stData.proficient) stDot.classList.add("dot-filled");
-                });
-            }
-
-            // ---- Skills ----
-            let allSkills = [
-                "Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception",
-                "History", "Insight", "Intimidation", "Investigation", "Medicine",
-                "Nature", "Perception", "Performance", "Persuasion", "Religion",
-                "Sleight of Hand", "Stealth", "Survival"
-            ];
-            if (character.skills) {
-                allSkills.forEach(function (skillName) {
-                    let skData = character.skills[skillName];
-                    if (!skData) return;
-                    let total = skData.baseMod + (skData.proficient ? profBonus : 0);
-                    let skSpan = document.getElementById("sk-" + skillName);
-                    if (skSpan) skSpan.textContent = fmt(total);
-                    let skDot = document.getElementById("sk-dot-" + skillName);
-                    if (skDot && skData.proficient) skDot.classList.add("dot-filled");
-                });
-            }
-
-            // ---- Passive Perception ----
-            if (character.skills && character.skills["Perception"]) {
-                let percData = character.skills["Perception"];
-                let percTotal = percData.baseMod + (percData.proficient ? profBonus : 0);
-                let ppEl = document.getElementById("sheet-passive-perception");
-                if (ppEl) ppEl.textContent = 10 + percTotal;
-            }
-
-            // ---- Personality ----
-            function joinPersonality(val) {
-                if (!val) return "";
-                if (Array.isArray(val)) return val.join(" • ");
-                return val;
-            }
-            document.getElementById("sheet-traits").textContent = joinPersonality(character.personality.traits);
-            document.getElementById("sheet-ideals").textContent = joinPersonality(character.personality.ideals);
-            document.getElementById("sheet-bonds").textContent = joinPersonality(character.personality.bonds);
-            document.getElementById("sheet-flaws").textContent = joinPersonality(character.personality.flaws);
-
-            // ---- Weapon Attacks ----
-            let tbody = document.getElementById("attacks-tbody");
-            if (tbody && character.weaponAttacks && character.weaponAttacks.length > 0) {
-                character.weaponAttacks.forEach(function (w) {
-                    let tr = document.createElement("tr");
-                    tr.innerHTML =
-                        "<td>" + w.name + "</td>" +
-                        "<td>" + w.attackBonus + "</td>" +
-                        "<td>" + w.damage + " " + w.type + "</td>" +
-                        tbody.appendChild(tr);
-                });
-            }
-
-            // ---- Cantrips & Spells ----
-            let spellsSection = document.getElementById("spells-section");
-            let hasCantrips = character.cantrips && character.cantrips.length > 0;
-            let hasSpells = character.spells && character.spells.length > 0;
-            if (hasCantrips || hasSpells) {
-                if (spellsSection) spellsSection.style.display = "block";
-                let cantripEl = document.getElementById("sheet-cantrips");
-                let spellEl = document.getElementById("sheet-spells");
-                if (cantripEl) cantripEl.textContent = hasCantrips ? character.cantrips.join(", ") : "None";
-                if (spellEl) spellEl.textContent = hasSpells ? character.spells.join(", ") : "None";
-            }
-
-            // ---- Feat ----
-            let featNameEl = document.getElementById("sheet-feat-name");
-            let featDescEl = document.getElementById("sheet-feat-desc");
-            if (featNameEl && character.feat) featNameEl.textContent = character.feat;
-            if (featDescEl && character.featDescription) featDescEl.textContent = character.featDescription;
-
-            // ---- Equipment list ----
-            let equipEl = document.getElementById("sheet-equipment");
-            if (equipEl && character.equipment && character.equipment.length > 0) {
-                // Count duplicates for clean display e.g. "Dagger x2"
-                let counts = {};
-                character.equipment.forEach(function (item) {
-                    counts[item] = (counts[item] || 0) + 1;
-                });
-                let displayItems = [];
-                let seen = {};
-                character.equipment.forEach(function (item) {
-                    if (seen[item]) return;
-                    seen[item] = true;
-                    displayItems.push(counts[item] > 1 ? item + " x" + counts[item] : item);
-                });
-                equipEl.textContent = displayItems.join(",");
-            }
-
-        });
-    </script>
+    <script src="site.js"></script>
+    <script src="generated-character.js"></script>
 
 </body>
 

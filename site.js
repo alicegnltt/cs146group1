@@ -116,7 +116,7 @@ function initDiceRoller() {
   //    D&D method), with a smooth update animation.
   // ─────────────────────────────────────────────
   
-  function roll4d6DropLowest() {
+  function roll4d6DropLowestForStatBoxes() {
     const dice = [0, 0, 0, 0].map(() => Math.floor(Math.random() * 6) + 1);
     dice.sort((a, b) => a - b);
     return dice.slice(1).reduce((sum, n) => sum + n, 0); // drop lowest
@@ -131,7 +131,7 @@ function initDiceRoller() {
   
     rollBtn.addEventListener("click", () => {
       scoreBoxes.forEach(box => {
-        const value = roll4d6DropLowest();
+        const value = roll4d6DropLowestForStatBoxes();
   
         // DOM manipulation — write the rolled value into the box
         box.textContent = value;

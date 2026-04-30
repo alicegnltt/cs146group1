@@ -31,6 +31,10 @@ body {
     align-items: center;
 }
 
+.site-title {
+    margin-right: 1rem;
+}
+
 .nav-list {
     list-style: none;
     display: flex;
@@ -47,6 +51,27 @@ body {
     text-decoration: underline;
 }
 
+/* DARK MODE BUTTON */
+
+#dark-mode-btn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+#dark-mode-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+
+
 /* HERO */
 
 .hero {
@@ -58,6 +83,8 @@ body {
     margin-top: 1rem;
 }
 
+/* BUTTONS */
+
 .button {
     display: inline-block;
     background: #5c3a21;
@@ -65,11 +92,19 @@ body {
     padding: 0.7rem 1.2rem;
     margin: 0.3rem;
     text-decoration: none;
+    border: none;
     border-radius: 5px;
+    font-family: inherit;
+    cursor: pointer;
 }
 
-.button.secondary {
+.button.secondary,
+.secondary-button {
     background: #4b6b3c;
+}
+
+.secondary-button {
+    opacity: 0.9;
 }
 
 /* FEATURES */
@@ -106,9 +141,30 @@ body {
     border-bottom: 1px solid #ddd;
 }
 
+.kw-search-wrap {
+    margin-bottom: 1rem;
+}
+
+.kw-search-input {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid #c9bfa8;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 1rem;
+    background: #faf8f3;
+    color: #2f2a23;
+}
+
+.kw-search-input:focus {
+    outline: none;
+    border-color: #5c3a21;
+}
+
 /* HOW TO PLAY */
 
-.info-boxes{
+.info-boxes {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
@@ -123,17 +179,18 @@ body {
     border-radius: 6px;
 }
 
-.how-to-play{
+.how-to-play {
     padding: 0 1rem;
 }
 
 .how-to-play h3 {
     color: #3e5f3e;
-    margin-bottom: 0.5 rem;
+    margin-bottom: 0.5rem;
     text-align: center;
     text-decoration: underline;
 }
-.how-to-play h4{
+
+.how-to-play h4 {
     color: #5c3a21;
     margin-top: 1rem;
     margin-bottom: 0.5rem;
@@ -148,33 +205,13 @@ body {
     margin-left: 1rem;
 }
 
-/* FOOTER */
-
-.site-footer {
-    background: #2f4f2f;
-    color: white;
-    text-align: center;
-    padding: 1rem;
-    margin-top: 2rem;
+.accordion-indicator {
+    font-size: 0.75rem;
+    color: #888;
+    margin-left: 0.4rem;
 }
 
-/* RESPONSIVE */
-
-@media (max-width: 800px) {
-    .features {
-        grid-template-columns: 1fr;
-    }
-
-    .header-inner {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-
-    .nav-list {
-        flex-direction: column;
-    }
-}
+/* CREATE CHARACTER */
 
 .character-start-card,
 .quiz-card {
@@ -194,6 +231,7 @@ body {
     max-width: 400px;
     padding: 10px 12px;
     margin: 8px 0 12px;
+    font-family: inherit;
     font-size: 1rem;
 }
 
@@ -205,7 +243,7 @@ body {
 }
 
 .error-message {
-    color: #8b1e1e;
+    color: #ff4d4d;
     font-weight: bold;
     margin-top: 6px;
 }
@@ -242,9 +280,246 @@ body {
     transform: translateY(-1px);
 }
 
-.secondary-button {
-    opacity: 0.9;
+.hidden {
+    display: none !important;
 }
-.error-message {
-    color: #ff4d4d;
+
+/* DICE ROLLER */
+
+.dice-roller-widget {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+    padding: 1.5rem 0 2rem;
+}
+
+.dice-result-display {
+    font-size: 2rem;
+    font-weight: bold;
+    min-width: 2.5rem;
+    text-align: center;
+    color: #5c3a21;
+    transition: transform 0.15s;
+}
+
+.dice-result-display.dice-pop {
+    animation: dicePop 0.35s ease;
+}
+
+.dice-result-display.critical {
+    color: #2e7d32;
+}
+
+.dice-result-display.fumble {
+    color: #c0392b;
+}
+
+@keyframes dicePop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* STAT ROLLER */
+
+.stat-roller-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 12px;
+    background: #f3efe4;
+    border-bottom: 1px solid #d7cdb7;
+}
+
+.stat-roll-btn {
+    background: #5c3a21;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.1rem;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.stat-roll-btn:hover {
+    background: #7a4f30;
+}
+
+.stat-roller-hint {
+    font-size: 0.78rem;
+    color: #666;
+}
+
+.score .box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.score .box.stat-pop {
+    animation: dicePop 0.35s ease;
+}
+
+/* FOOTER */
+
+.site-footer {
+    background: #2f4f2f;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+}
+
+/* DARK MODE */
+
+body.dark {
+    background: #1a1a2e;
+    color: #e0d8c8;
+}
+
+body.dark .site-header,
+body.dark .site-footer {
+    background: #0f2f1f;
+}
+
+body.dark .feature-card,
+body.dark .info-box,
+body.dark .kw-search-input,
+body.dark .character-start-card,
+body.dark .quiz-card {
+    background: #22223a;
+    border-color: #3a3a5c;
+    color: #e0d8c8;
+}
+
+body.dark .keyword-list dt,
+body.dark .how-to-play h3 {
+    color: #7ec87e;
+}
+
+body.dark .keyword-list dd {
+    border-color: #3a3a5c;
+}
+
+body.dark .how-to-play h4 {
+    color: #c8906a;
+}
+
+body.dark #player-name {
+    background: #1a1a2e;
+    color: #e0d8c8;
+    border: 1px solid #3a3a5c;
+}
+
+body.dark #options-container button {
+    background-color: #1a1a2e;
+    border-color: #7ec87e;
+    color: #e0d8c8;
+}
+
+body.dark #options-container button:hover {
+    background-color: #2b2b45;
+}
+
+body.dark .stat-roller-bar {
+    background: #22223a;
+    border-color: #3a3a5c;
+}
+
+body.dark .stat-roller-hint {
+    color: #aaa;
+}
+
+body.dark .score .box {
+    background: #22223a;
+    border-color: #3a3a5c;
+    color: #e0d8c8;
+}
+
+body.dark .dice-result-display {
+    color: #c8906a;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 800px) {
+    .features,
+    .info-boxes {
+        grid-template-columns: 1fr;
+    }
+
+    .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .nav-list {
+        flex-direction: column;
+    }
+
+    .button-group,
+    .dice-roller-widget,
+    .stat-roller-bar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+body.dark .box-section,
+body.dark .SAI {
+    background: #252741 !important;
+    color: #f2eadf !important;
+    border-color: #f2eadf !important;
+}
+
+body.dark h1,
+body.dark h2,
+body.dark h3,
+body.dark p,
+body.dark span,
+body.dark li,
+body.dark th,
+body.dark td {
+    color: #f2eadf !important;
+}
+
+body.dark .top-row {
+    border-bottom-color: #f2eadf;
+}
+
+body.dark .dot {
+    border-color: #f2eadf;
+}
+
+body.dark table,
+body.dark th,
+body.dark td {
+    background: #252741 !important;
+    color: #f2eadf !important;
+}
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
 }

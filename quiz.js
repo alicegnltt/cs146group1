@@ -606,6 +606,7 @@ function roll4d6DropLowest() {
   let min = Math.min.apply(null, rolls);
   let minDropped = false;
   let kept = [];
+
   for (let i = 0; i < rolls.length; i++) {
     if (!minDropped && rolls[i] === min) {
       minDropped = true;
@@ -613,20 +614,21 @@ function roll4d6DropLowest() {
     }
     kept.push(rolls[i]);
   }
+
   let total = kept.reduce(function (a, b) {
     return a + b;
   }, 0);
+
   return { rolls: rolls, kept: kept, dropped: min, total: total };
 }
 
 function rollAllScores() {
   let results = [];
-  for (let i = 0; i < 6; i++) results.push(roll4d6DropLowest());
+  for (let i = 0; i < 6; i++) {
+    results.push(roll4d6DropLowest());
+  }
   return results;
 }
-
-
-
 //FIX STUFF
 window.addEventListener("load", function () {
   let setupScreen = document.getElementById("setup-screen");
@@ -640,15 +642,17 @@ window.addEventListener("load", function () {
   // This listener will now ONLY trigger for the manual button
   if (startButton) {
     startButton.addEventListener("click", function () {
-      // Only proceed if a name is entered
       if (validateName()) {
+        let characterName = nameInput.value.trim();
+  
         setupScreen.style.display = "none";
         quizScreen.style.display = "block";
-
+        quizScreen.dataset.characterName = characterName;
+  
         let form = document.createElement("form");
         form.id = "character-form";
-
-        quizScreen.innerHTML = "<h2>Manual Character Creation</h2>";
+  
+        quizScreen.innerHTML = "<h2>Manual Character Creation: " + characterName + "</h2>";
         quizScreen.appendChild(form);
 
         // ---- Helper: labelled dropdown ----
@@ -1196,19 +1200,6 @@ window.addEventListener("load", function () {
         // EVENT LISTENERS
         // --------------------
 
-        startButton.addEventListener("click", function () {
-          let characterName = nameInput.value.trim();
-          if (characterName === "") {
-            alert("Please enter a character name before starting!");
-            return;
-          }
-          setupScreen.style.display = "none";
-          quizScreen.style.display = "block";
-          quizScreen.querySelector("h2").textContent =
-            "Create Your Character: " + characterName;
-          quizScreen.dataset.characterName = characterName;
-        });
-
         submitBtn.addEventListener("click", function () {
           errorMsg.textContent = "";
 
@@ -1466,6 +1457,21 @@ window.addEventListener("load", function () {
             mergeUnique(spells, ["Entangle"]);
           }
 
+          let HIT_DICE_LABELS = {
+            Barbarian: "1d12",
+            Fighter: "1d10",
+            Paladin: "1d10",
+            Ranger: "1d10",
+            Bard: "1d8",
+            Cleric: "1d8",
+            Druid: "1d8",
+            Monk: "1d8",
+            Rogue: "1d8",
+            Warlock: "1d8",
+            Sorcerer: "1d6",
+            Wizard: "1d6"
+          };
+
           // ---- Build and save character object ----
           let characterData = {
             name: characterName,
@@ -1498,6 +1504,7 @@ window.addEventListener("load", function () {
               bonds: getBonds(),
               flaws: getFlaws(),
             },
+            hitDie: HIT_DICE_LABELS[charClass] || "1d8",
           };
 
           localStorage.setItem("dndCharacter", JSON.stringify(characterData));
