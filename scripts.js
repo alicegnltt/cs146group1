@@ -46,8 +46,7 @@ let character = {
     spellSaveDC: 0,
     spellAttackBonus: 0,
     cantrips: [],
-    spells: [],
-    inspiration: false
+    spells: []
 };
 
 const scores = {
@@ -1252,12 +1251,8 @@ window.addEventListener("load", function () {
     }
 
     function abilityScoreHTML(score) {
-        const mod = getModifier(score);
-        const modText = mod >= 0 ? "+" + mod : mod;
-
         return `
             <div class="ability-score-number">${score}</div>
-            <div class="ability-score-mod">(${modText})</div>
         `;
     }
 
@@ -1311,8 +1306,6 @@ window.addEventListener("load", function () {
     safeHTML("sheet-species-traits", listHTML(character.speciesTraits));
     safeHTML("sheet-feats", listHTML(character.feats));
     safeHTML("sheet-equipment", listHTML(character.equipment));
-
-    safeText("sheet-inspiration", character.inspiration ? "Yes" : "None");
 
     // Spells
     safeText("sheet-spell-ability", character.spellcastingAbility || "None");

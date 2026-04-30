@@ -256,6 +256,19 @@ let SPECIES = [
   "Tiefling",
 ];
 
+let SPECIES_LANGUAGES = {
+  Aasimar: ["Common", "Celestial"],
+  Dragonborn: ["Common", "Draconic"],
+  Dwarf: ["Common", "Dwarvish"],
+  Elf: ["Common", "Elvish"],
+  Gnome: ["Common", "Gnomish"],
+  Goliath: ["Common", "Giant"],
+  Halfling: ["Common", "Halfling"],
+  Human: ["Common"],
+  Orc: ["Common", "Orc"],
+  Tiefling: ["Common", "Infernal"],
+};
+
 let CLASSES = [
   "Barbarian",
   "Bard",
@@ -644,15 +657,16 @@ window.addEventListener("load", function () {
     startButton.addEventListener("click", function () {
       if (validateName()) {
         let characterName = nameInput.value.trim();
-  
+
         setupScreen.style.display = "none";
         quizScreen.style.display = "block";
         quizScreen.dataset.characterName = characterName;
-  
+
         let form = document.createElement("form");
         form.id = "character-form";
-  
-        quizScreen.innerHTML = "<h2>Manual Character Creation: " + characterName + "</h2>";
+
+        quizScreen.innerHTML =
+          "<h2>Manual Character Creation: " + characterName + "</h2>";
         quizScreen.appendChild(form);
 
         // ---- Helper: labelled dropdown ----
@@ -675,7 +689,8 @@ window.addEventListener("load", function () {
             for (let key in optionList) {
               let opt = document.createElement("option");
               opt.value = key;
-              opt.textContent = key + " (+" + optionList[key].stats.join(", +") + ")";
+              opt.textContent =
+                key + " (+" + optionList[key].stats.join(", +") + ")";
               sel.appendChild(opt);
             }
           } else {
@@ -790,7 +805,8 @@ window.addEventListener("load", function () {
             let counter = document.getElementById("skill-counter");
             if (counter) {
               counter.textContent = checkedCount + " / " + count + " selected";
-              counter.style.color = checkedCount === count ? "green" : "inherit";
+              counter.style.color =
+                checkedCount === count ? "green" : "inherit";
             }
           }
 
@@ -887,7 +903,8 @@ window.addEventListener("load", function () {
         let equipNote = document.createElement("p");
         equipNote.className = "prototype-note";
         equipNote.id = "equip-note";
-        equipNote.textContent = "Select a class above to see your equipment options.";
+        equipNote.textContent =
+          "Select a class above to see your equipment options.";
         form.appendChild(equipNote);
 
         let equipPickerDiv = document.createElement("div");
@@ -1006,7 +1023,8 @@ window.addEventListener("load", function () {
 
           let lbl = document.createElement("label");
           lbl.htmlFor = rb.id;
-          lbl.innerHTML = "<strong>" + feat.name + "</strong> — " + feat.description;
+          lbl.innerHTML =
+            "<strong>" + feat.name + "</strong> — " + feat.description;
           lbl.style.cursor = "pointer";
 
           row.appendChild(rb);
@@ -1141,14 +1159,16 @@ window.addEventListener("load", function () {
           let addBtn = document.createElement("button");
           addBtn.type = "button";
           addBtn.className = "button";
-          addBtn.style.cssText = "font-size:0.8em;padding:4px 10px;margin-top:6px;";
+          addBtn.style.cssText =
+            "font-size:0.8em;padding:4px 10px;margin-top:6px;";
           addBtn.textContent = "+ Add Another";
           wrapper.appendChild(addBtn);
 
           form.appendChild(wrapper);
 
           function addEntry() {
-            if (entriesDiv.querySelectorAll("textarea").length >= maxEntries) return;
+            if (entriesDiv.querySelectorAll("textarea").length >= maxEntries)
+              return;
             let ta = document.createElement("textarea");
             ta.name = fieldId + "[]";
             ta.rows = 2;
@@ -1266,7 +1286,8 @@ window.addEventListener("load", function () {
             let statName = STATS[s];
             let val = statSelects[statName] ? statSelects[statName].value : "";
             if (!val) {
-              errorMsg.textContent = "Please assign a score to " + statName + ".";
+              errorMsg.textContent =
+                "Please assign a score to " + statName + ".";
               return;
             }
             let parts = val.split(":");
@@ -1422,7 +1443,11 @@ window.addEventListener("load", function () {
           if (chosenFeat === "Skilled") {
             let allSkillNames2 = Object.keys(SKILL_STAT_MAP);
             let addedCount = 0;
-            for (let sf = 0; sf < allSkillNames2.length && addedCount < 3; sf++) {
+            for (
+              let sf = 0;
+              sf < allSkillNames2.length && addedCount < 3;
+              sf++
+            ) {
               let sn = allSkillNames2[sf];
               if (skillProficiencies.indexOf(sn) === -1) {
                 skillProficiencies.push(sn);
@@ -1433,7 +1458,10 @@ window.addEventListener("load", function () {
           }
 
           // ---- Collect cantrips + spells (class magic + feat magic) ----
-          let classMagic = CLASS_MAGIC[charClass] || { cantrips: [], spells: [] };
+          let classMagic = CLASS_MAGIC[charClass] || {
+            cantrips: [],
+            spells: [],
+          };
           let cantrips = classMagic.cantrips.slice();
           let spells = classMagic.spells.slice();
 
@@ -1469,7 +1497,7 @@ window.addEventListener("load", function () {
             Rogue: "1d8",
             Warlock: "1d8",
             Sorcerer: "1d6",
-            Wizard: "1d6"
+            Wizard: "1d6",
           };
 
           // ---- Build and save character object ----
@@ -1504,6 +1532,7 @@ window.addEventListener("load", function () {
               bonds: getBonds(),
               flaws: getFlaws(),
             },
+            languages: SPECIES_LANGUAGES[species] || ["Common"],
             hitDie: HIT_DICE_LABELS[charClass] || "1d8",
           };
 

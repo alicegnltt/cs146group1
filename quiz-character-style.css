@@ -130,6 +130,15 @@ small {
     border: 1px solid #2f2a23;
 }
 
+.dot-filled {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid #2f2a23;
+    background-color: #2f2a23;
+}
+
 /* Hit points */
 .heart-box {
     display: flex;
