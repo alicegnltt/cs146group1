@@ -245,3 +245,6 @@ body {
 .secondary-button {
     opacity: 0.9;
 }
+.error-message {
+    color: #ff4d4d;
+}

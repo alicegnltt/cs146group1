@@ -41,10 +41,10 @@
             <label for="player-name">Character Name</label>
             <input id="player-name" type="text" placeholder=" --- ">
 
-            <p id="name-error" class="error-message" style="color: #ff4d4d;"></p>
+            <p id="name-error" class="error-message"></p>
 
             <div class="button-group">
-                <button id="auto-quiz-btn" class="button" type="button" onclick="validateAndStartQuiz()">
+                <button id="auto-quiz-btn" class="button" type="button">
                     Take the Quiz
                 </button>
             
@@ -63,27 +63,6 @@
 
     <script src="quiz.js"></script>
     <script src="scripts.js"></script>
-
-    <script>
-        function validateName() {
-            var nameInput = document.getElementById("player-name");
-            var errorMessage = document.getElementById("name-error");
-
-            if (nameInput.value.trim() === "") {
-                errorMessage.textContent = "Please enter your character's name first.";
-                return false;
-            }
-
-            errorMessage.textContent = "";
-            return true;
-        }
-
-        function validateAndStartQuiz() {
-            if (validateName()) {
-                startCharacterQuiz();
-            }
-        }
-    </script>
 
 </body>
 

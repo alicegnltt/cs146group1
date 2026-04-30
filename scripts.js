@@ -508,6 +508,32 @@ const classData = {
     }
 };
 
+function validateName() {
+    const nameInput = document.getElementById("player-name");
+    const errorMessage = document.getElementById("name-error");
+
+    if (nameInput.value.trim() === "") {
+        errorMessage.textContent = "Please enter your character's name first.";
+        return false;
+    }
+
+    errorMessage.textContent = "";
+    return true;
+}
+
+function validateAndStartQuiz() {
+    if (validateName()) {
+        startCharacterQuiz();
+    }
+}
+
+// Attach event listeners AFTER DOM loads
+document.addEventListener("DOMContentLoaded", () => {
+    const quizButton = document.getElementById("auto-quiz-btn");
+
+    quizButton.addEventListener("click", validateAndStartQuiz);
+});
+
 function getModifier(score) {
     return Math.floor((score - 10) / 2);
 }
