@@ -1,12 +1,4 @@
-// site.js — shared JS for all pages
-// All interactions use event listeners and DOM manipulation. No inline JS.
-
-// ─────────────────────────────────────────────
-// 1. DICE ROLLER (index.html — home page)
-//    Floating dice button in the corner that rolls
-//    a d20 and shows the result with a brief animation.
-// ─────────────────────────────────────────────
-
+// Dicer roler
 function initDiceRoller() {
     const btn = document.getElementById("dice-btn");
     const result = document.getElementById("dice-result");
@@ -15,7 +7,7 @@ function initDiceRoller() {
     btn.addEventListener("click", () => {
       const roll = Math.floor(Math.random() * 20) + 1;
   
-      // DOM manipulation — update result text and style
+      // update result text and style
       result.textContent = roll;
       result.className = "dice-result-display"; // reset animation
       void result.offsetWidth;                  // force reflow
@@ -35,12 +27,7 @@ function initDiceRoller() {
     });
   }
   
-  // ─────────────────────────────────────────────
-  // 2. KEYWORD SEARCH FILTER (keywords.html)
-  //    Live search box that hides terms that don't
-  //    match, with a "no results" message.
-  // ─────────────────────────────────────────────
-  
+  // Key word search filter
   function initKeywordSearch() {
     const searchBox = document.getElementById("keyword-search");
     const noResults = document.getElementById("kw-no-results");
@@ -59,25 +46,20 @@ function initDiceRoller() {
           dt.textContent.toLowerCase().includes(query) ||
           (dd && dd.textContent.toLowerCase().includes(query));
   
-        // DOM manipulation — show/hide each term+definition pair
+        // show/hide each term+definition pair
         dt.style.display = matches ? "" : "none";
         if (dd) dd.style.display = matches ? "" : "none";
         if (matches) visibleCount++;
       });
   
-      // DOM manipulation — toggle "no results" message
+      // toggle "no results" message
       if (noResults) {
         noResults.style.display = visibleCount === 0 ? "block" : "none";
       }
     });
   }
   
-  // ─────────────────────────────────────────────
-  // 3. SECTION ACCORDION (how-to-play.html)
-  //    Clicking an article heading collapses/expands
-  //    the body of that section.
-  // ─────────────────────────────────────────────
-  
+  // Section Accordation
   function initAccordion() {
     const articles = document.querySelectorAll(".info-box.how-to-play");
     if (articles.length === 0) return;
@@ -86,7 +68,7 @@ function initDiceRoller() {
       const heading = article.querySelector("h3");
       if (!heading) return;
   
-      // DOM manipulation — add toggle indicator and ARIA attributes
+      // add toggle indicator and ARIA attributes
       const indicator = document.createElement("span");
       indicator.className = "accordion-indicator";
       indicator.textContent = " ▲";
@@ -97,7 +79,7 @@ function initDiceRoller() {
       heading.addEventListener("click", () => {
         const expanded = article.getAttribute("aria-expanded") === "true";
   
-        // DOM manipulation — show/hide content inside the article
+        // show/hide content inside the article
         const children = [...article.children].filter(el => el !== heading);
         children.forEach(child => {
           child.style.display = expanded ? "none" : "";
@@ -109,13 +91,7 @@ function initDiceRoller() {
     });
   }
   
-  // ─────────────────────────────────────────────
-  // 4. STAT ROLLER (generated-character.html)
-  //    Button that randomly fills in the six ability
-  //    score boxes using 4d6-drop-lowest (standard
-  //    D&D method), with a smooth update animation.
-  // ─────────────────────────────────────────────
-  
+  // Stat roller
   function roll4d6DropLowestForStatBoxes() {
     const dice = [0, 0, 0, 0].map(() => Math.floor(Math.random() * 6) + 1);
     dice.sort((a, b) => a - b);
@@ -149,14 +125,7 @@ function initDiceRoller() {
     });
   }
   
-  // ─────────────────────────────────────────────
-  // 5. CHARACTER CREATOR PLACEHOLDER (create-character.html)
-  //    If the teammate's quiz JS isn't loaded yet,
-  //    this at minimum wires up the start button to
-  //    show a name-based greeting — won't clash with
-  //    the full quiz if it IS present.
-  // ─────────────────────────────────────────────
-  
+  // Character Creator Placeholder
   function initCreateCharacter() {
     const startBtn = document.getElementById("start-btn");
     const nameInput = document.getElementById("player-name");
@@ -169,7 +138,7 @@ function initDiceRoller() {
     startBtn.addEventListener("click", () => {
       const name = nameInput.value.trim();
       if (!name) {
-        // DOM manipulation — inject an error message
+        // DOM manipulation
         let err = document.getElementById("name-error");
         if (!err) {
           err = document.createElement("p");
@@ -187,10 +156,7 @@ function initDiceRoller() {
       }
     });
   }
-  
-  // ─────────────────────────────────────────────
-  // INIT — run the right function(s) for this page
-  // ─────────────────────────────────────────────
+
   
   document.addEventListener("DOMContentLoaded", () => {
     initDiceRoller();
@@ -200,11 +166,7 @@ function initDiceRoller() {
     initCreateCharacter();
   });
   
-  // ─────────────────────────────────────────────
-  // 6. DARK MODE TOGGLE (all pages)
-  //    Persists preference via localStorage so it
-  //    carries across page navigation.
-  // ─────────────────────────────────────────────
+  // Dark Mode
   
   function initDarkMode() {
     const btn = document.getElementById("dark-mode-btn");
