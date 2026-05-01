@@ -1210,15 +1210,57 @@ window.addEventListener("load", function () {
         errorMsg.textContent = "";
         form.appendChild(errorMsg);
 
+        let buttonRow = document.createElement("div");
+        buttonRow.style.cssText = "display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;";
+
         let submitBtn = document.createElement("button");
         submitBtn.type = "button";
         submitBtn.className = "button";
         submitBtn.textContent = "Generate My Character!";
-        form.appendChild(submitBtn);
+
+        let resetBtn = document.createElement("button");
+        resetBtn.type = "button";
+        resetBtn.className = "button";
+        resetBtn.textContent = "Reset Form";
+
+        buttonRow.appendChild(submitBtn);
+        buttonRow.appendChild(resetBtn);
+        form.appendChild(buttonRow);
 
         // --------------------
         // EVENT LISTENERS
         // --------------------
+
+
+        resetBtn.addEventListener("click", function () {
+          form.reset();
+
+          errorMsg.textContent = "";
+
+          rolledScores = [];
+          statSelects = {};
+
+          rollResultsDiv.style.display = "none";
+          rollResultsDiv.innerHTML = "";
+
+          statAssignDiv.style.display = "none";
+          statAssignDiv.innerHTML = "";
+
+          skillPickerDiv.innerHTML = "";
+          skillNote.textContent =
+            "Select a class above to see your available skill choices.";
+
+          equipPickerDiv.innerHTML = "";
+          equipNote.textContent =
+            "Select a class above to see your equipment options.";
+
+          equipGroups = [];
+
+          rollBtn.textContent = "🎲 Roll Dice";
+
+          localStorage.removeItem("dndCharacter");
+        });
+
 
         submitBtn.addEventListener("click", function () {
           errorMsg.textContent = "";
